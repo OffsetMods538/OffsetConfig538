@@ -27,6 +27,4 @@ public interface ConfigManager {
 
     @NotNull @UnmodifiableView
     Collection<ConfigHolder<? extends Config>> getConfigHolders();
-
-    // todo: <T extends Config> void applyDatafixers(@NotNull T fallback, @NotNull ErrorHandler errorHandler);
 }

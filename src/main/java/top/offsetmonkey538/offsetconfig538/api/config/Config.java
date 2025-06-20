@@ -10,19 +10,17 @@ public interface Config {
 
 
     @Contract(value = "_ -> param1", pure = false)
-    default @NotNull Jankson.Builder configureJankson(final @NotNull Jankson.Builder builder) {
-        return builder;
+    default void configureJankson(final @NotNull Jankson.Builder builder) {
+        // no-op
     }
 
-    /* TODO: datafixers
-    default @NotNull List<Datafixer> getDatafixers() {
-        return List.of();
+    default @NotNull Datafixer[] getDatafixers() {
+        return new Datafixer[] {};
     }
 
     default int getConfigVersion() {
         return 0;
     }
-    */
 
     default @NotNull Path getFilePath() {
         return getConfigDir().resolve(getName() + ".json");

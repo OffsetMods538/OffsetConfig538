@@ -3,22 +3,30 @@ package top.offsetmonkey538.offsetconfig538.impl.config;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
+import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import top.offsetmonkey538.offsetconfig538.api.config.Config;
 import top.offsetmonkey538.offsetconfig538.api.config.ConfigHolder;
 import top.offsetmonkey538.offsetconfig538.api.config.ConfigManager;
+import top.offsetmonkey538.offsetconfig538.api.config.Datafixer;
 import top.offsetmonkey538.offsetconfig538.api.event.OffsetConfig538Events;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public final class ConfigManagerImpl implements ConfigManager {
     private static final String VERSION_KEY = "!!!version";
+    private static final String VERSION_COMMENT = "!!!!! DO NOT MODIFY THIS VALUE !!!!";
 
     private static final Map<String, ConfigHolder<?>> CONFIG_HOLDERS = new HashMap<>();
 
@@ -54,10 +62,11 @@ public final class ConfigManagerImpl implements ConfigManager {
             return;
         }
 
-        // TODO: Run datafixers if needed
-        //  applyDatafixers(...);
+        final boolean modified = applyDatafixers(configHolder, json, jankson);
 
         configHolder.set(jankson.fromJson(json, configHolder.configClass));
+
+        if (modified) save(configHolder);
     }
 
     @Override
@@ -76,8 +85,8 @@ public final class ConfigManagerImpl implements ConfigManager {
             return;
         }
 
-        // TODO: Add config version (datafixer stuff)
-        //  json.put(VERSION_KEY, ...);
+        // Write config version
+        json.put(VERSION_KEY, JsonPrimitive.of(BigInteger.valueOf(configHolder.get().getConfigVersion())), VERSION_COMMENT);
 
         // Convert to string
         final String result = json.toJson(true, true);
@@ -89,6 +98,27 @@ public final class ConfigManagerImpl implements ConfigManager {
         } catch (IOException e) {
             configHolder.errorHandler.log("Config file '%s' could not be saved!", e, configHolder);
         }
+    }
+
+    @Contract
+    private <T extends Config> boolean applyDatafixers(final @NotNull ConfigHolder<T> configHolder, final @NotNull JsonObject json, final @NotNull Jankson jankson) {
+        final int loadedVersion = json.getInt(VERSION_KEY, 0);
+        final int currentVersion = configHolder.get().getConfigVersion();
+
+        if (loadedVersion == currentVersion) return false;
+        if (loadedVersion > currentVersion) configHolder.errorHandler.log("Config file '%s' is for a newer version! Expected config version to be '%s', got '%s'! (Did the mod get downgraded or are you just messing with the value that literally says to not modify it?)", configHolder, currentVersion, loadedVersion);
+
+        final Path backupPath = configHolder.get().getFilePath().resolveSibling("%s-backup-%s.json".formatted(configHolder.get().getFilePath().getFileName(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss"))));
+        try {
+            Files.copy(configHolder.get().getFilePath(), backupPath);
+        } catch (IOException e) {
+            configHolder.errorHandler.log("Unable to create backup of config file '%s'! Continuing anyway cause I don't care 'bout your config.", e, configHolder);
+        }
+
+        for (Datafixer datafixer : Arrays.copyOfRange(configHolder.get().getDatafixers(), loadedVersion, currentVersion)) {
+            datafixer.apply(json, jankson);
+        }
+        return true;
     }
 
     @Override
