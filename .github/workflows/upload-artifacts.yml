@@ -1,0 +1,46 @@
+name: Build artifacts
+
+on:
+  push:
+    branches:
+      - "*"
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Store short commit hash
+        run: echo "short_commit_hash=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+
+      - name: Build with Gradle
+        run: ./gradlew build
+        env:
+          CUSTOM_VERSION: ${{ env.short_commit_hash }}
+
+      - name: Publish to Maven
+        run: ./gradlew publishMavenPublicationToOffsetMods538Repository
+        env:
+          CUSTOM_VERSION: ${{ env.short_commit_hash }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build Artifacts
+          path: ./*/build/libs/

@@ -4,7 +4,15 @@ plugins {
     id 'maven-publish'
 }
 
-group = "top.offsetmonkey538.offsetconfig538"
+group = project.maven_group
+if ("true".equalsIgnoreCase(System.getenv("IS_DEBUG"))) {
+    version = "${version}-${System.currentTimeMillis()}"
+}
+final String customVersion = System.getenv("CUSTOM_VERSION")
+if (customVersion != null && !customVersion.isEmpty()) {
+    version = "${version}-${customVersion}"
+}
+println "Version: ${version}"
 
 repositories {
     mavenCentral()
@@ -42,13 +50,16 @@ jar {
     }
 
     // Include dependencies
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    //duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations.include.collect {
-            println it
             it.isDirectory() ? it : zipTree(it)
         }
     }
+}
+
+tasks.named("javadoc", Javadoc) {
+    options.addFileOption('-add-stylesheet', rootProject.file("javadoc-stylesheet.css"))
 }
 
 java {
@@ -57,5 +68,24 @@ java {
 }
 
 publishing {
-    // todo
+    repositories {
+        maven {
+            name = "OffsetMods538"
+            url = "https://maven.offsetmonkey538.top/releases"
+            credentials {
+                username = providers.gradleProperty("OffsetMods538Username").getOrElse(System.getenv("MAVEN_USERNAME"))
+                password = providers.gradleProperty("OffsetMods538Password").getOrElse(System.getenv("MAVEN_PASSWORD"))
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            artifactId = project.archivesBaseName
+
+            from(components["java"])
+        }
+    }
 }
