@@ -44,7 +44,9 @@ public interface Config {
      * @see #getConfigDir()
      */
     @Deprecated
-    @NotNull String getName();
+    default @NotNull String getName() {
+        throw new UnsupportedOperationException("The 'getName' method of config not implemented! Either override 'getFilePath' and use a custom Path or implement both 'getName' and 'getConfigDir'");
+    }
 
     /**
      * Used for building the config file path.
@@ -61,5 +63,7 @@ public interface Config {
      * @see #getName()
      */
     @Deprecated
-    @NotNull Path getConfigDir();
+    default @NotNull Path getConfigDir() {
+        throw new UnsupportedOperationException("The 'getConfigDir' method of config not implemented! Either override 'getFilePath' and use a custom Path or implement both 'getName' and 'getConfigDir'");
+    }
 }
