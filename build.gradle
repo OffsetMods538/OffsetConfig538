@@ -31,7 +31,7 @@ configurations {
 dependencies {
     includeApi "blue.endless:jankson:${project.jankson_version}"
 
-    compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
+    testCompileOnly compileOnly("org.jetbrains:annotations:${project.jetbrains_annotations_version}")
 
 
     testImplementation platform("org.junit:junit-bom:${project.junit_version}")
