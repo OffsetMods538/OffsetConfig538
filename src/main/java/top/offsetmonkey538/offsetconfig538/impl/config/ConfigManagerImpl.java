@@ -10,11 +10,11 @@ import org.jetbrains.annotations.UnmodifiableView;
 import top.offsetmonkey538.offsetconfig538.api.config.Config;
 import top.offsetmonkey538.offsetconfig538.api.config.ConfigHolder;
 import top.offsetmonkey538.offsetconfig538.api.config.ConfigManager;
+import top.offsetmonkey538.offsetconfig538.api.event.OffsetConfig538Events;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public final class ConfigManagerImpl implements ConfigManager {
@@ -39,7 +39,7 @@ public final class ConfigManagerImpl implements ConfigManager {
             return;
         }
 
-        final Jankson jankson = configHolder.get().configureJankson(Jankson.builder()).build(); // TODO: global jankson builder configuration event thingy
+        final Jankson jankson = configureJankson(configHolder);
         final File configFile = configHolder.get().getFilePath().toFile();
 
         // Load it from disk
@@ -67,7 +67,7 @@ public final class ConfigManagerImpl implements ConfigManager {
             return;
         }
 
-        final Jankson jankson = configHolder.get().configureJankson(Jankson.builder()).build(); // TODO: global jankson builder configuration event thingy
+        final Jankson jankson = configureJankson(configHolder);
 
         // Convert to json
         final JsonElement jsonAsElement = jankson.toJson(configHolder.get());
@@ -114,5 +114,14 @@ public final class ConfigManagerImpl implements ConfigManager {
     @Override
     public @NotNull @UnmodifiableView Collection<ConfigHolder<? extends Config>> getConfigHolders() {
         return Collections.unmodifiableCollection(CONFIG_HOLDERS.values());
+    }
+
+    private @NotNull Jankson configureJankson(final @NotNull ConfigHolder<?> configHolder) {
+        final Jankson.Builder builder = Jankson.builder();
+
+        OffsetConfig538Events.JANKSON_CONFIGURATION_EVENT.getInvoker().configureBuilder(builder);
+        configHolder.get().configureJankson(builder);
+
+        return builder.build();
     }
 }
