@@ -86,7 +86,7 @@ public final class ConfigManagerImpl implements ConfigManager {
         }
 
         // Write config version
-        json.put(VERSION_KEY, JsonPrimitive.of(BigInteger.valueOf(configHolder.get().getConfigVersion())), VERSION_COMMENT);
+        json.put(VERSION_KEY, new JsonPrimitive(configHolder.get().getConfigVersion()), VERSION_COMMENT);
 
         // Convert to string
         final String result = json.toJson(true, true);
