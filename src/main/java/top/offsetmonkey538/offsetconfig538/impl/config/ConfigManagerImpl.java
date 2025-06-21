@@ -5,10 +5,7 @@ import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.*;
 import top.offsetmonkey538.offsetconfig538.api.config.Config;
 import top.offsetmonkey538.offsetconfig538.api.config.ConfigHolder;
 import top.offsetmonkey538.offsetconfig538.api.config.ConfigManager;
@@ -17,18 +14,31 @@ import top.offsetmonkey538.offsetconfig538.api.event.OffsetConfig538Events;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Implementation of the {@link ConfigManager}
+ */
+@ApiStatus.Internal
 public final class ConfigManagerImpl implements ConfigManager {
     private static final String VERSION_KEY = "!!!version";
     private static final String VERSION_COMMENT = "!!!!! DO NOT MODIFY THIS VALUE !!!!";
 
     private static final Map<String, ConfigHolder<?>> CONFIG_HOLDERS = new HashMap<>();
+
+    /**
+     * Constructs the {@link ConfigManager} implementation.
+     * <p>
+     * Should only be called when initializing {@link ConfigManager#INSTANCE}
+     */
+    @ApiStatus.Internal
+    public ConfigManagerImpl() {
+
+    }
 
     @Override
     public @NotNull <T extends Config> ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder) {
