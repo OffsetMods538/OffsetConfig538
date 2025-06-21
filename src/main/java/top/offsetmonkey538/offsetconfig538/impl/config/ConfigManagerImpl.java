@@ -108,7 +108,7 @@ public final class ConfigManagerImpl implements ConfigManager {
         if (loadedVersion == currentVersion) return false;
         if (loadedVersion > currentVersion) configHolder.errorHandler.log("Config file '%s' is for a newer version! Expected config version to be '%s', got '%s'! (Did the mod get downgraded or are you just messing with the value that literally says to not modify it?)", configHolder, currentVersion, loadedVersion);
 
-        final Path backupPath = configHolder.get().getFilePath().resolveSibling("%s-backup-%s.json".formatted(configHolder.get().getFilePath().getFileName(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss"))));
+        final Path backupPath = configHolder.get().getFilePath().resolveSibling("backup-%s-%s".formatted(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss")), configHolder.get().getFilePath().getFileName()));
         try {
             Files.copy(configHolder.get().getFilePath(), backupPath);
         } catch (IOException e) {
