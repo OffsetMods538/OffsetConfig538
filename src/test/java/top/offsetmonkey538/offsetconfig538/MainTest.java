@@ -31,13 +31,8 @@ public class MainTest {
         float veryNice = 1233;
 
         @Override
-        public @NotNull String getName() {
-            return "test";
-        }
-
-        @Override
-        public @NotNull Path getConfigDir() {
-            return Path.of(".", "test");
+        public @NotNull Path getFilePath() {
+            return Path.of(".", "test", "test.json");
         }
 
         @Override
