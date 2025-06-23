@@ -1,6 +1,9 @@
 package top.offsetmonkey538.offsetconfig538.api.event;
 
-import java.lang.reflect.Array;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import top.offsetmonkey538.offsetconfig538.impl.event.EventImpl;
+
 import java.util.function.Function;
 
 /**
@@ -8,26 +11,19 @@ import java.util.function.Function;
  *
  * @param <T> the handler type
  */
-public class Event<T> {
-    /**
-     * Function that turns the list of handlers into a handler. Should loop over all handlers and run them one by one. May have custom logic
-     */
-    private final Function<T[], T> invokerFactory;
-    /**
-     * List of handlers
-     */
-    private T[] handlers;
+@ApiStatus.NonExtendable
+public interface Event<T> {
 
     /**
      * Creates a new event
      *
      * @param type the handler type
      * @param invokerFactory a function that turns the list of handlers into a handler. Should loop over all handlers and run them one by one. May have custom logic
+     * @return a new event
+     * @param <T> the handler type
      */
-    @SuppressWarnings("unchecked")
-    public Event(final Class<T> type, Function<T[], T> invokerFactory) {
-        this.invokerFactory = invokerFactory;
-        this.handlers = (T[]) Array.newInstance(type, 0);
+    static <T> @NotNull Event<T> createEvent(final Class<T> type, Function<T[], T> invokerFactory) {
+        return new EventImpl<>(type, invokerFactory);
     }
 
     /**
@@ -35,22 +31,12 @@ public class Event<T> {
      *
      * @param listener the listener to register
      */
-    public void listen(T listener) {
-        @SuppressWarnings("unchecked")
-        final T[] newArray = (T[]) Array.newInstance(handlers.getClass().getComponentType(), handlers.length + 1);
-
-        System.arraycopy(handlers, 0, newArray, 0, handlers.length);
-        newArray[handlers.length] = listener;
-
-        this.handlers = newArray;
-    }
+    void listen(T listener);
 
     /**
-     * Uses the {@link #invokerFactory} to create an invoker. This is used to actually invoke the event.
+     * Creates an invoker. This is used to actually invoke the event.
      *
      * @return an invoker to invoke this event.
      */
-    public T getInvoker() {
-        return invokerFactory.apply(handlers);
-    }
+    T getInvoker();
 }

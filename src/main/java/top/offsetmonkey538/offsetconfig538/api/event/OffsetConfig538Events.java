@@ -22,7 +22,7 @@ public final class OffsetConfig538Events {
      * @see ConfigManager#load(ConfigHolder)
      * @see ConfigManager#save(ConfigHolder)
      */
-    public static final Event<JanksonConfigurationEvent> JANKSON_CONFIGURATION_EVENT = new Event<>(JanksonConfigurationEvent.class, handlers -> builder -> {
+    public static final Event<JanksonConfigurationEvent> JANKSON_CONFIGURATION_EVENT = Event.createEvent(JanksonConfigurationEvent.class, handlers -> builder -> {
         for (final JanksonConfigurationEvent handler : handlers) handler.configureBuilder(builder);
     });
 
