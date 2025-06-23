@@ -20,7 +20,7 @@ public class MainTest {
     public void testMain() {
         OffsetConfig538Events.JANKSON_CONFIGURATION_EVENT.listen(System.out::println);
 
-        final ConfigHolder<TestConfig> holder = ConfigManager.INSTANCE.init(new ConfigHolder<>(TestConfig::new, ErrorHandler.SYSTEM_ERR));
+        final ConfigHolder<TestConfig> holder = ConfigManager.INSTANCE.init(ConfigHolder.create(TestConfig::new, ErrorHandler.SYSTEM_ERR));
 
         System.out.println(holder.get().goodbye);
         System.out.println(holder.get().veryNice);

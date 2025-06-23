@@ -9,6 +9,9 @@ import java.nio.file.Path;
 
 /**
  * The class to implement in your config
+ * <p>
+ *     All config fields must be non-final!
+ * </p>
  */
 public interface Config {
 

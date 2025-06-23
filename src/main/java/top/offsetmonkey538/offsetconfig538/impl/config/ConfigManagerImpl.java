@@ -29,7 +29,7 @@ public final class ConfigManagerImpl implements ConfigManager {
     private static final String VERSION_KEY = "!!!version";
     private static final String VERSION_COMMENT = "!!!!! DO NOT MODIFY THIS VALUE !!!!";
 
-    private static final Map<String, ConfigHolder<?>> CONFIG_HOLDERS = new HashMap<>();
+    private static final Map<String, ConfigHolderImpl<?>> CONFIG_HOLDERS = new HashMap<>();
 
     /**
      * Constructs the {@link ConfigManager} implementation.
@@ -43,7 +43,7 @@ public final class ConfigManagerImpl implements ConfigManager {
 
     @Override
     public @NotNull <T extends Config> ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder) {
-        CONFIG_HOLDERS.put(configHolder.getId(), configHolder);
+        CONFIG_HOLDERS.put(configHolder.getId(), (ConfigHolderImpl<T>) configHolder);
 
         if (Files.exists(configHolder.get().getFilePath())) load(configHolder);
 
@@ -53,74 +53,78 @@ public final class ConfigManagerImpl implements ConfigManager {
 
     @Override
     public <T extends Config> void load(@NotNull ConfigHolder<T> configHolder) {
-        if (!CONFIG_HOLDERS.containsKey(configHolder.getId()) || !CONFIG_HOLDERS.containsValue(configHolder)) {
-            configHolder.errorHandler.log("Trying to load uninitialized config with id '%s'!", configHolder.getId());
+        final ConfigHolderImpl<T> configHolderImpl = (ConfigHolderImpl<T>) configHolder;
+
+        if (!CONFIG_HOLDERS.containsKey(configHolderImpl.getId()) || !CONFIG_HOLDERS.containsValue(configHolderImpl)) {
+            configHolderImpl.errorHandler.log("Trying to load uninitialized config with id '%s'!", configHolderImpl.getId());
             return;
         }
 
-        final Jankson jankson = configureJankson(configHolder);
-        final File configFile = configHolder.get().getFilePath().toFile();
+        final Jankson jankson = configureJankson(configHolderImpl);
+        final File configFile = configHolderImpl.get().getFilePath().toFile();
 
         // Load it from disk
         final JsonObject json;
         try {
             json = jankson.load(configFile);
         } catch (IOException e) {
-            configHolder.errorHandler.log("Config file '%s' could not be read!", e, configHolder);
+            configHolderImpl.errorHandler.log("Config file '%s' could not be read!", e, configHolderImpl.getId());
             return;
         } catch (SyntaxError e) {
-            configHolder.errorHandler.log("Config file '%s' is formatted incorrectly!", e, configHolder);
+            configHolderImpl.errorHandler.log("Config file '%s' is formatted incorrectly!", e, configHolderImpl.getId());
             return;
         }
 
-        final boolean modified = applyDatafixers(configHolder, json, jankson);
+        final boolean modified = applyDatafixers(configHolderImpl, json, jankson);
 
         try {
             // Remove version first, otherwise 'fromJsonCarefully' will throw because it's not in the config object
             json.remove(VERSION_KEY);
 
-            configHolder.set(jankson.fromJsonCarefully(json, configHolder.configClass));
+            configHolderImpl.set(jankson.fromJsonCarefully(json, configHolderImpl.configClass));
         } catch (DeserializationException e) {
-            configHolder.errorHandler.log("Failed to create config class '%s' from json!", e, configHolder.configClass.getName());
-            configHolder.set(jankson.fromJson(json, configHolder.configClass));
+            configHolderImpl.errorHandler.log("Failed to create config class '%s' from json!", e, configHolderImpl.configClass.getName());
+            configHolderImpl.set(jankson.fromJson(json, configHolderImpl.configClass));
         }
 
-        if (modified) save(configHolder);
+        if (modified) save(configHolderImpl);
     }
 
     @Override
     public <T extends Config> void save(@NotNull ConfigHolder<T> configHolder) {
-        if (!CONFIG_HOLDERS.containsKey(configHolder.getId()) || !CONFIG_HOLDERS.containsValue(configHolder)) {
-            configHolder.errorHandler.log("Trying to save uninitialized config with id '%s'!", configHolder.getId());
+        final ConfigHolderImpl<T> configHolderImpl = (ConfigHolderImpl<T>) configHolder;
+
+        if (!CONFIG_HOLDERS.containsKey(configHolderImpl.getId()) || !CONFIG_HOLDERS.containsValue(configHolderImpl)) {
+            configHolderImpl.errorHandler.log("Trying to save uninitialized config with id '%s'!", configHolderImpl.getId());
             return;
         }
 
-        final Jankson jankson = configureJankson(configHolder);
+        final Jankson jankson = configureJankson(configHolderImpl);
 
         // Convert to json
-        final JsonElement jsonAsElement = jankson.toJson(configHolder.get());
+        final JsonElement jsonAsElement = jankson.toJson(configHolderImpl.get());
         if (!(jsonAsElement instanceof final JsonObject json)) {
-            configHolder.errorHandler.log("Config '%s' could not be serialized to a 'JsonObject', got '%s' instead! Config will not be saved.", configHolder, jsonAsElement.getClass().getName());
+            configHolderImpl.errorHandler.log("Config '%s' could not be serialized to a 'JsonObject', got '%s' instead! Config will not be saved.", configHolderImpl.getId(), jsonAsElement.getClass().getName());
             return;
         }
 
         // Write config version
-        json.put(VERSION_KEY, new JsonPrimitive(configHolder.get().getConfigVersion()), VERSION_COMMENT);
+        json.put(VERSION_KEY, new JsonPrimitive(configHolderImpl.get().getConfigVersion()), VERSION_COMMENT);
 
         // Convert to string
         final String result = json.toJson(true, true);
 
         // Save
         try {
-            Files.createDirectories(configHolder.get().getFilePath().getParent());
-            Files.writeString(configHolder.get().getFilePath(), result);
+            Files.createDirectories(configHolderImpl.get().getFilePath().getParent());
+            Files.writeString(configHolderImpl.get().getFilePath(), result);
         } catch (IOException e) {
-            configHolder.errorHandler.log("Config file '%s' could not be saved!", e, configHolder);
+            configHolderImpl.errorHandler.log("Config file '%s' could not be saved!", e, configHolderImpl.getId());
         }
     }
 
     @Contract
-    private <T extends Config> boolean applyDatafixers(final @NotNull ConfigHolder<T> configHolder, final @NotNull JsonObject json, final @NotNull Jankson jankson) {
+    private <T extends Config> boolean applyDatafixers(final @NotNull ConfigHolderImpl<T> configHolder, final @NotNull JsonObject json, final @NotNull Jankson jankson) {
         final int loadedVersion = json.getInt(VERSION_KEY, 0);
         final int currentVersion = configHolder.get().getConfigVersion();
 
@@ -147,7 +151,7 @@ public final class ConfigManagerImpl implements ConfigManager {
 
     @Override
     public @Nullable <T extends Config> ConfigHolder<T> get(@NotNull String id, @NotNull Class<T> configClass) {
-        final ConfigHolder<? extends Config> configHolder = CONFIG_HOLDERS.get(id);
+        final ConfigHolderImpl<? extends Config> configHolder = CONFIG_HOLDERS.get(id);
         if (configHolder == null) return null;
 
         // todo: does this equal thing right here work?
