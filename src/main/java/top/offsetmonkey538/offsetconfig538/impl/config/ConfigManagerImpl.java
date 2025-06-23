@@ -4,6 +4,7 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
+import blue.endless.jankson.api.DeserializationException;
 import blue.endless.jankson.api.SyntaxError;
 import org.jetbrains.annotations.*;
 import top.offsetmonkey538.offsetconfig538.api.config.Config;
@@ -74,7 +75,15 @@ public final class ConfigManagerImpl implements ConfigManager {
 
         final boolean modified = applyDatafixers(configHolder, json, jankson);
 
-        configHolder.set(jankson.fromJson(json, configHolder.configClass));
+        try {
+            // Remove version first, otherwise 'fromJsonCarefully' will throw because it's not in the config object
+            json.remove(VERSION_KEY);
+
+            configHolder.set(jankson.fromJsonCarefully(json, configHolder.configClass));
+        } catch (DeserializationException e) {
+            configHolder.errorHandler.log("Failed to create config class '%s' from json!", e, configHolder.configClass.getName());
+            configHolder.set(jankson.fromJson(json, configHolder.configClass));
+        }
 
         if (modified) save(configHolder);
     }
