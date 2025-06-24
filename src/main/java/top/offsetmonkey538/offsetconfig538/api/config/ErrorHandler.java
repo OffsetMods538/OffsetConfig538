@@ -1,10 +1,10 @@
 package top.offsetmonkey538.offsetconfig538.api.config;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintStream;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -38,6 +38,17 @@ public interface ErrorHandler extends BiConsumer<String, Throwable> {
      */
     @Override
     void accept(@NotNull String error, @Nullable Throwable throwable);
+
+    @Override
+    @NotNull
+    default ErrorHandler andThen(@NotNull BiConsumer<? super String, ? super Throwable> after) {
+        Objects.requireNonNull(after);
+
+        return (error, throwable) -> {
+            accept(error, throwable);
+            after.accept(error, throwable);
+        };
+    }
 
     /**
      * Logs the provided error.
