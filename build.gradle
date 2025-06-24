@@ -67,6 +67,10 @@ java {
     withSourcesJar()
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
+
 publishing {
     repositories {
         maven {
