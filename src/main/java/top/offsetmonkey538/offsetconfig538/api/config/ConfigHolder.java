@@ -42,6 +42,20 @@ public interface ConfigHolder<T extends Config> {
     @NotNull T get();
 
     /**
+     * Returns the class of the held config.
+     *
+     * @return the class of the held config.
+     */
+    @NotNull Class<T> getConfigClass();
+
+    /**
+     * The {@link ErrorHandler} used for logging errors during handling of the config.
+     *
+     * @return the {@link ErrorHandler} used for logging errors during handling of the config.
+     */
+    @NotNull ErrorHandler getErrorHandler();
+
+    /**
      * Returns the id of the held config.
      * <br>
      * Always equal to the config {@link T#getFilePath() file path}.

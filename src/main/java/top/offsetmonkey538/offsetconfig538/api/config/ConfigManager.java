@@ -16,68 +16,78 @@ public interface ConfigManager {
     ConfigManager INSTANCE = new ConfigManagerImpl();
 
     /**
-     * Initializes the provided {@link ConfigHolder}. No other methods should be called before this.
+     * Initializes the provided {@link ConfigHolder}.
+     * <p>
+     *     Initializing means first trying to {@link #load(ConfigHolder) load} the config if possible, and then {@link #save(ConfigHolder) saving} it.
+     * </p>
+     * <p>
+     *     Uses the {@link ErrorHandler} from the config holder.
+     * </p>
      *
      * @param configHolder the {@link ConfigHolder} to initialize.
      * @return the provided {@link ConfigHolder}, in case you want to inline initialization and creating the holder.
      * @param <T> your {@link Config} class
-     * @see #load(ConfigHolder)
-     * @see #save(ConfigHolder)
      */
-    <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder);
+    default <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder) {
+        return init(configHolder, configHolder.getErrorHandler());
+    }
+
+    /**
+     * Initializes the provided {@link ConfigHolder}.
+     * <p>
+     *     Initializing means first trying to {@link #load(ConfigHolder, ErrorHandler) load} the config if possible, and then {@link #save(ConfigHolder, ErrorHandler) saving} it.
+     * </p>
+     *
+     * @param configHolder the {@link ConfigHolder} to initialize.
+     * @param errorHandler the {@link ErrorHandler} to use
+     * @return the provided {@link ConfigHolder}, in case you want to inline initialization and creating the holder.
+     * @param <T> your {@link Config} class
+     */
+    <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+
+    /**
+     * Loads a config from disk into the provided {@link ConfigHolder} and applies any required {@link Datafixer}s.
+     * <p>
+     *     Uses the {@link ErrorHandler} from the config holder.
+     * </p>
+     *
+     * @param configHolder the {@link ConfigHolder} to load
+     * @param <T> your {@link Config} class
+     */
+    @Contract // pure=false is default
+    default <T extends Config> void load(@NotNull ConfigHolder<T> configHolder) {
+        load(configHolder, configHolder.getErrorHandler());
+    }
 
     /**
      * Loads a config from disk into the provided {@link ConfigHolder} and applies any required {@link Datafixer}s.
      *
      * @param configHolder the {@link ConfigHolder} to load
+     * @param errorHandler the {@link ErrorHandler} to use
      * @param <T> your {@link Config} class
-     * @see #init(ConfigHolder)
-     * @see #save(ConfigHolder)
+     */
+    <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+
+    /**
+     * Saves the currently held config to disk from the provided {@link ConfigHolder} also writes the config version for datafixing.
+     * <p>
+     *     Uses the {@link ErrorHandler} from the config holder.
+     * </p>
+     *
+     * @param configHolder the {@link ConfigHolder} to load
+     * @param <T> your {@link Config} class
      */
     @Contract // pure=false is default
-    <T extends Config> void load(@NotNull ConfigHolder<T> configHolder);
+    default <T extends Config> void save(@NotNull ConfigHolder<T> configHolder) {
+        save(configHolder, configHolder.getErrorHandler());
+    }
 
     /**
      * Saves the currently held config to disk from the provided {@link ConfigHolder} also writes the config version for datafixing.
      *
      * @param configHolder the {@link ConfigHolder} to load
+     * @param errorHandler the {@link ErrorHandler} to use
      * @param <T> your {@link Config} class
-     * @see #init(ConfigHolder)
-     * @see #load(ConfigHolder)
      */
-    @Contract // pure=false is default
-    <T extends Config> void save(@NotNull ConfigHolder<T> configHolder);
-
-    /**
-     * Gets a {@link ConfigHolder} by its id, or {@code null} if it hasn't been initialized with {@link #init(ConfigHolder)}
-     * <br>
-     * Unlike {@link #get(String, Class)}, this method returns a {@link ConfigHolder} for a generic {@link Config} class.
-     *
-     * @param id the id of the {@link ConfigHolder}
-     * @return a {@link ConfigHolder} corresponding to the provided id.
-     * @see #get(String, Class)
-     */
-    @Contract(pure = true)
-    @Nullable ConfigHolder<? extends Config> get(@NotNull String id);
-
-    /**
-     * Gets a {@link ConfigHolder} by its id, or {@code null} if it hasn't been initialized with {@link #init(ConfigHolder)} or doesn't match the provided {@link Class}.
-     * <br>
-     * Unlike {@link #get(String)}, this method validates a {@link ConfigHolder} against the provided {@link Class}.
-     *
-     * @param id the id of the {@link ConfigHolder}
-     * @param configClass the class of your {@link Config}
-     * @return a {@link ConfigHolder} corresponding to the provided id and holding a {@link Config} of the provided {@link Class}.
-     * @param <T> your {@link Config} class
-     * @see #get(String)
-     */
-    @Contract(pure = true)
-    <T extends Config> @Nullable ConfigHolder<T> get(@NotNull String id, @NotNull Class<T> configClass);
-
-    /**
-     * Returns a collection of all {@link ConfigHolder}s initialized with {@link #init(ConfigHolder)}
-     * @return a collection of all {@link ConfigHolder}s initialized with {@link #init(ConfigHolder)}
-     */
-    @NotNull @UnmodifiableView
-    Collection<ConfigHolder<? extends Config>> getConfigHolders();
+    <T extends Config> void save(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
 }

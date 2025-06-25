@@ -24,7 +24,7 @@ public final class ConfigHolderImpl<T extends Config> implements ConfigHolder<T>
     /**
      * An {@link ErrorHandler} used for logging errors during handling of the config.
      */
-    public final @NotNull ErrorHandler errorHandler;
+    private final @NotNull ErrorHandler errorHandler;
     /**
      * The {@link Class<T>} of the {@link Config}.
      * <br>
@@ -59,6 +59,16 @@ public final class ConfigHolderImpl<T extends Config> implements ConfigHolder<T>
     @Contract(pure = true)
     public @NotNull T get() {
         return config;
+    }
+
+    @Override
+    public @NotNull Class<T> getConfigClass() {
+        return configClass;
+    }
+
+    @Override
+    public @NotNull ErrorHandler getErrorHandler() {
+        return errorHandler;
     }
 
     public @NotNull String getId() {
