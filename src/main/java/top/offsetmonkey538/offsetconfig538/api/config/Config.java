@@ -65,6 +65,15 @@ public interface Config {
     }
 
     /**
+     * This method will be called before the loading of this config starts.
+     * <br />
+     * This may be used to for example migrate configs from previous locations.
+     */
+    default void beforeLoadStart() {
+
+    }
+
+    /**
      * Provides the {@link Path} to the config file.
      * <br>
      * Should also include extension.

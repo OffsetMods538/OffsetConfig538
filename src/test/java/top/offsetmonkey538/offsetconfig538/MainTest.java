@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import top.offsetmonkey538.offsetconfig538.api.config.*;
 import top.offsetmonkey538.offsetconfig538.api.event.OffsetConfig538Events;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MainTest {
@@ -32,7 +34,7 @@ public class MainTest {
 
         @Override
         public @NotNull Path getFilePath() {
-            return Path.of(".", "test", "test.json");
+            return Path.of(".", "test", "test2.json");
         }
 
         @Override
@@ -49,6 +51,19 @@ public class MainTest {
         @Override
         public int getConfigVersion() {
             return 1;
+        }
+
+        @Override
+        public void beforeLoadStart() {
+            final Path originalLocation = Path.of(".", "test", "test.json");
+            if (Files.exists(originalLocation)) {
+                try {
+                    Files.createDirectories(originalLocation.getParent());
+                    Files.move(originalLocation, getFilePath());
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to move config file to new location!", e);
+                }
+            }
         }
     }
 

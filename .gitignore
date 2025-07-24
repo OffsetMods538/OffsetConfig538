@@ -9,3 +9,5 @@ classes
 *replay_*.log
 *.hprof
 *.jfr
+
+test/

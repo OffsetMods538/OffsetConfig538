@@ -71,10 +71,12 @@ public final class ConfigHolderImpl<T extends Config> implements ConfigHolder<T>
         return errorHandler;
     }
 
-    public @NotNull String getId() {
+    @Override
+    public @NotNull String toString() {
         return config.getFilePath().toString();
     }
 
+    @Override
     public void set(@Nullable T newConfig) {
         if (newConfig == null) config = defaultConstructor.get();
         else config = newConfig;

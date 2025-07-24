@@ -38,7 +38,7 @@ public final class ConfigManagerImpl implements ConfigManager {
 
     @Override
     public @NotNull <T extends Config> ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
-        if (Files.exists(configHolder.get().getFilePath())) load(configHolder, errorHandler);
+        load(configHolder, errorHandler);
 
         save(configHolder, errorHandler);
         return configHolder;
@@ -46,6 +46,10 @@ public final class ConfigManagerImpl implements ConfigManager {
 
     @Override
     public <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+        configHolder.get().beforeLoadStart();
+        if (!Files.exists(configHolder.get().getFilePath())) return;
+
+
         final ConfigHolderImpl<T> configHolderImpl = (ConfigHolderImpl<T>) configHolder;
         final Jankson jankson = configureJankson(configHolderImpl);
         final File configFile = configHolderImpl.get().getFilePath().toFile();
@@ -55,10 +59,10 @@ public final class ConfigManagerImpl implements ConfigManager {
         try {
             json = jankson.load(configFile);
         } catch (IOException e) {
-            errorHandler.log("Config file '%s' could not be read!", e, configHolderImpl.getId());
+            errorHandler.log("Config file '%s' could not be read!", e, configHolderImpl);
             return;
         } catch (SyntaxError e) {
-            errorHandler.log("Config file '%s' is formatted incorrectly!", e, configHolderImpl.getId());
+            errorHandler.log("Config file '%s' is formatted incorrectly!", e, configHolderImpl);
             return;
         }
 
@@ -85,7 +89,7 @@ public final class ConfigManagerImpl implements ConfigManager {
         // Convert to json
         final JsonElement jsonAsElement = jankson.toJson(configHolderImpl.get());
         if (!(jsonAsElement instanceof final JsonObject json)) {
-            errorHandler.log("Config '%s' could not be serialized to a 'JsonObject', got '%s' instead! Config will not be saved.", configHolderImpl.getId(), jsonAsElement.getClass().getName());
+            errorHandler.log("Config '%s' could not be serialized to a 'JsonObject', got '%s' instead! Config will not be saved.", configHolderImpl, jsonAsElement.getClass().getName());
             return;
         }
 
@@ -100,7 +104,7 @@ public final class ConfigManagerImpl implements ConfigManager {
             Files.createDirectories(configHolderImpl.get().getFilePath().getParent());
             Files.writeString(configHolderImpl.get().getFilePath(), result);
         } catch (IOException e) {
-            errorHandler.log("Config file '%s' could not be saved!", e, configHolderImpl.getId());
+            errorHandler.log("Config file '%s' could not be saved!", e, configHolderImpl);
         }
     }
 
