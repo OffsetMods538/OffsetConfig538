@@ -79,7 +79,7 @@ public interface ErrorHandler extends BiConsumer<String, Throwable> {
      * @param args args to format the string with, may be null
      */
     default void log(@NotNull String error, @Nullable  Object... args) {
-        accept(error.formatted(), null);
+        accept(error.formatted(args), null);
     }
 
     /**

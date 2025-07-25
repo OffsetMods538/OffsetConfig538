@@ -10,7 +10,6 @@ import org.jetbrains.annotations.*;
 import top.offsetmonkey538.offsetconfig538.api.config.*;
 import top.offsetmonkey538.offsetconfig538.api.event.OffsetConfig538Events;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,17 +51,18 @@ public final class ConfigManagerImpl implements ConfigManager {
 
         final ConfigHolderImpl<T> configHolderImpl = (ConfigHolderImpl<T>) configHolder;
         final Jankson jankson = configureJankson(configHolderImpl);
-        final File configFile = configHolderImpl.get().getFilePath().toFile();
 
         // Load it from disk
         final JsonObject json;
         try {
-            json = jankson.load(configFile);
+            json = jankson.load(Files.newInputStream(configHolderImpl.get().getFilePath()));
         } catch (IOException e) {
             errorHandler.log("Config file '%s' could not be read!", e, configHolderImpl);
             return;
         } catch (SyntaxError e) {
-            errorHandler.log("Config file '%s' is formatted incorrectly!", e, configHolderImpl);
+            errorHandler.log("Config file '%s' is formatted incorrectly!", configHolderImpl);
+            errorHandler.log(e.getMessage());
+            errorHandler.log(e.getLineMessage());
             return;
         }
 
@@ -114,7 +114,7 @@ public final class ConfigManagerImpl implements ConfigManager {
         final int currentVersion = configHolder.get().getConfigVersion();
 
         if (loadedVersion == currentVersion) return false;
-        if (loadedVersion > currentVersion) errorHandler.log("Config file '%s' is for a newer version! Expected config version to be '%s', got '%s'! (Did the mod get downgraded or are you just messing with the value that literally says to not modify it?)", configHolder, currentVersion, loadedVersion);
+        if (loadedVersion > currentVersion) errorHandler.log("Config file '%s' is for a newer version! Expected config version to be '%s', got '%s'! (Do you have an older version or are you just messing with the value that literally says to not modify it?)", configHolder, currentVersion, loadedVersion);
 
         final Path backupPath = configHolder.get().getFilePath().resolveSibling("backup-%s-%s".formatted(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd-HH_mm_ss")), configHolder.get().getFilePath().getFileName()));
         try {
