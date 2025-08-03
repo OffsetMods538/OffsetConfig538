@@ -38,6 +38,11 @@ public class MainTest {
         }
 
         @Override
+        public @NotNull String getId() {
+            return "test";
+        }
+
+        @Override
         public @NotNull Datafixer[] getDatafixers() {
             return new Datafixer[] {
                     (json, jankson) -> {
