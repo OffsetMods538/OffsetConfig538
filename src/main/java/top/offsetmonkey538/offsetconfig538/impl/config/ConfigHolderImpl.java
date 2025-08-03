@@ -73,7 +73,7 @@ public final class ConfigHolderImpl<T extends Config> implements ConfigHolder<T>
 
     @Override
     public @NotNull String toString() {
-        return config.getFilePath().toString();
+        return config.getId();
     }
 
     @Override

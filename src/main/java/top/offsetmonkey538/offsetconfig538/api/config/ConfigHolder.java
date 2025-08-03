@@ -56,11 +56,11 @@ public interface ConfigHolder<T extends Config> {
     @NotNull ErrorHandler getErrorHandler();
 
     /**
-     * Returns the path to the config file.
+     * Returns the identifier of the config file.
      * <br>
-     * Always equal to {@link T#getFilePath()}.
+     * Always equal to {@link T#getId()}.
      *
-     * @return the path to the held config file.
+     * @return the identifier of the held config file.
      */
     @NotNull String toString();
 
