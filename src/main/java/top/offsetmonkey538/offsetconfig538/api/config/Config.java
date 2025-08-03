@@ -81,4 +81,13 @@ public interface Config {
      * @return the {@link Path} to the config file.
      */
     @NotNull Path getFilePath();
+
+    /**
+     * Provides an identifier for this config file.
+     * <br>
+     * Example: {@code github-resourcepack-manager/main}
+     *
+     * @return ad identifier for this config file.
+     */
+    @NotNull String getId();
 }
