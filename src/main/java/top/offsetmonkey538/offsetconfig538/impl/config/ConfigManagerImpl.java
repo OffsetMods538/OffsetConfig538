@@ -37,9 +37,9 @@ public final class ConfigManagerImpl implements ConfigManager {
 
     @Override
     public @NotNull <T extends Config> ConfigHolder<T> initImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
-        load(configHolder, errorHandler);
+        ConfigManager.load(configHolder, errorHandler);
 
-        save(configHolder, errorHandler);
+        ConfigManager.save(configHolder, errorHandler);
         return configHolder;
     }
 
@@ -78,7 +78,7 @@ public final class ConfigManagerImpl implements ConfigManager {
             configHolderImpl.set(jankson.fromJson(json, configHolderImpl.configClass));
         }
 
-        if (modified) save(configHolderImpl);
+        if (modified) ConfigManager.save(configHolderImpl);
     }
 
     @Override
