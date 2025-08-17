@@ -27,7 +27,7 @@ public interface ConfigManager {
      * @return the provided {@link ConfigHolder}, in case you want to inline initialization and creating the holder.
      * @param <T> your {@link Config} class
      */
-    default <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder) {
+    static <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder) {
         return init(configHolder, configHolder.getErrorHandler());
     }
 
@@ -42,7 +42,7 @@ public interface ConfigManager {
      * @return the provided {@link ConfigHolder}, in case you want to inline initialization and creating the holder.
      * @param <T> your {@link Config} class
      */
-    default <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+    static <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
         return INSTANCE.initImpl(configHolder, errorHandler);
     }
 
@@ -55,7 +55,7 @@ public interface ConfigManager {
      * @param configHolder the {@link ConfigHolder} to load
      * @param <T> your {@link Config} class
      */
-    default <T extends Config> void load(@NotNull ConfigHolder<T> configHolder) {
+    static <T extends Config> void load(@NotNull ConfigHolder<T> configHolder) {
         load(configHolder, configHolder.getErrorHandler());
     }
 
@@ -66,7 +66,7 @@ public interface ConfigManager {
      * @param errorHandler the {@link ErrorHandler} to use
      * @param <T> your {@link Config} class
      */
-    default <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+    static <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
         INSTANCE.loadImpl(configHolder, errorHandler);
     }
 
@@ -79,7 +79,7 @@ public interface ConfigManager {
      * @param configHolder the {@link ConfigHolder} to load
      * @param <T> your {@link Config} class
      */
-    default <T extends Config> void save(@NotNull ConfigHolder<T> configHolder) {
+    static <T extends Config> void save(@NotNull ConfigHolder<T> configHolder) {
         save(configHolder, configHolder.getErrorHandler());
     }
 
@@ -90,7 +90,7 @@ public interface ConfigManager {
      * @param errorHandler the {@link ErrorHandler} to use
      * @param <T> your {@link Config} class
      */
-    default <T extends Config> void save(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+    static <T extends Config> void save(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
         INSTANCE.saveImpl(configHolder, errorHandler);
     }
 
