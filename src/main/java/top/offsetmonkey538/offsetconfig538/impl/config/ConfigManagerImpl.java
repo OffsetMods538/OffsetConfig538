@@ -36,7 +36,7 @@ public final class ConfigManagerImpl implements ConfigManager {
     }
 
     @Override
-    public @NotNull <T extends Config> ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+    public @NotNull <T extends Config> ConfigHolder<T> initImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
         load(configHolder, errorHandler);
 
         save(configHolder, errorHandler);
@@ -44,7 +44,7 @@ public final class ConfigManagerImpl implements ConfigManager {
     }
 
     @Override
-    public <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+    public <T extends Config> void loadImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
         configHolder.get().beforeLoadStart();
         if (!Files.exists(configHolder.get().getFilePath())) return;
 
@@ -82,7 +82,7 @@ public final class ConfigManagerImpl implements ConfigManager {
     }
 
     @Override
-    public <T extends Config> void save(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+    public <T extends Config> void saveImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
         final ConfigHolderImpl<T> configHolderImpl = (ConfigHolderImpl<T>) configHolder;
         final Jankson jankson = configureJankson(configHolderImpl);
 

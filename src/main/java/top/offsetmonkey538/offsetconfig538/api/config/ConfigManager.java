@@ -3,16 +3,15 @@ package top.offsetmonkey538.offsetconfig538.api.config;
 import org.jetbrains.annotations.*;
 import top.offsetmonkey538.offsetconfig538.impl.config.ConfigManagerImpl;
 
-import java.util.Collection;
-
 /**
  * Has methods for loading and saving configs
  */
 @ApiStatus.NonExtendable
 public interface ConfigManager {
     /**
-     * Instance to access all them methods through
+     * Instance of the implementation
      */
+    @ApiStatus.Internal
     ConfigManager INSTANCE = new ConfigManagerImpl();
 
     /**
@@ -43,7 +42,9 @@ public interface ConfigManager {
      * @return the provided {@link ConfigHolder}, in case you want to inline initialization and creating the holder.
      * @param <T> your {@link Config} class
      */
-    <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+    default <T extends Config> @NotNull ConfigHolder<T> init(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+        return INSTANCE.initImpl(configHolder, errorHandler);
+    }
 
     /**
      * Loads a config from disk into the provided {@link ConfigHolder} and applies any required {@link Datafixer}s.
@@ -54,7 +55,6 @@ public interface ConfigManager {
      * @param configHolder the {@link ConfigHolder} to load
      * @param <T> your {@link Config} class
      */
-    @Contract // pure=false is default
     default <T extends Config> void load(@NotNull ConfigHolder<T> configHolder) {
         load(configHolder, configHolder.getErrorHandler());
     }
@@ -66,7 +66,9 @@ public interface ConfigManager {
      * @param errorHandler the {@link ErrorHandler} to use
      * @param <T> your {@link Config} class
      */
-    <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+    default <T extends Config> void load(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+        INSTANCE.loadImpl(configHolder, errorHandler);
+    }
 
     /**
      * Saves the currently held config to disk from the provided {@link ConfigHolder} also writes the config version for datafixing.
@@ -77,7 +79,6 @@ public interface ConfigManager {
      * @param configHolder the {@link ConfigHolder} to load
      * @param <T> your {@link Config} class
      */
-    @Contract // pure=false is default
     default <T extends Config> void save(@NotNull ConfigHolder<T> configHolder) {
         save(configHolder, configHolder.getErrorHandler());
     }
@@ -89,5 +90,16 @@ public interface ConfigManager {
      * @param errorHandler the {@link ErrorHandler} to use
      * @param <T> your {@link Config} class
      */
-    <T extends Config> void save(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+    default <T extends Config> void save(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler) {
+        INSTANCE.saveImpl(configHolder, errorHandler);
+    }
+
+
+    // Impl
+    @ApiStatus.Internal
+    <T extends Config> @NotNull ConfigHolder<T> initImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+    @ApiStatus.Internal
+    <T extends Config> void loadImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
+    @ApiStatus.Internal
+    <T extends Config> void saveImpl(@NotNull ConfigHolder<T> configHolder, @NotNull ErrorHandler errorHandler);
 }
