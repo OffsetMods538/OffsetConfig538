@@ -18,18 +18,8 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    include
-
-
-    includeApi
-
-    include.extendsFrom includeApi
-    api.extendsFrom includeApi
-}
-
 dependencies {
-    includeApi "blue.endless:jankson:${project.jankson_version}"
+    api "blue.endless:jankson:${project.jankson_version}"
 
     testCompileOnly compileOnly("org.jetbrains:annotations:${project.jetbrains_annotations_version}")
 
@@ -46,14 +36,6 @@ jar {
     from("LICENSE") {
         rename {
             "${it}_${project.archivesBaseName}"
-        }
-    }
-
-    // Include dependencies
-    //duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from {
-        configurations.include.collect {
-            it.isDirectory() ? it : zipTree(it)
         }
     }
 }
