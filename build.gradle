@@ -41,6 +41,7 @@ dependencies {
 
     testImplementation platform("org.junit:junit-bom:${project.junit_version}")
     testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 test {
@@ -49,9 +50,7 @@ test {
 
 jar {
     from("LICENSE") {
-        rename {
-            "${it}_${project.archivesBaseName}"
-        }
+        rename { "${it}" }
     }
 }
 
@@ -84,9 +83,9 @@ publishing {
     }
     publications {
         maven(MavenPublication) {
-            artifactId = project.archivesBaseName
+            artifactId = base.archivesName.get()
 
-            from(components["java"])
+            from components.java
         }
     }
 }
