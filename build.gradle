@@ -1,18 +1,33 @@
+import java.nio.file.Files
+
 plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
 }
 
-group = project.maven_group
-if ("true".equalsIgnoreCase(System.getenv("IS_DEBUG"))) {
-    version = "${version}-${System.currentTimeMillis()}"
+ext {
+    version = rootProject.project_version
+    if (!Boolean.parseBoolean(System.getenv("IS_RELEASE"))) {
+        String preReleaseVersion = System.currentTimeSeconds()
+
+        if (Boolean.parseBoolean(System.getenv("PRESERVE_PRERELEASE_VERSION"))) {
+            var preReleaseVersionFile = file("preReleaseVersion.txt").toPath()
+            if (Files.exists(preReleaseVersionFile)) preReleaseVersion = Files.readString(preReleaseVersionFile)
+            Files.writeString(preReleaseVersionFile, preReleaseVersion)
+        }
+
+        var separator = "-"
+        if (version.contains("-")) separator = "."
+        version = "${version}${separator}${preReleaseVersion}"
+    }
+    final String versionSuffix = System.getenv("VERSION_SUFFIX")
+    if (versionSuffix != null && !versionSuffix.isEmpty()) {
+        version = "${version}+${versionSuffix}"
+    }
+
+    System.out.println("Version: ${version}")
 }
-final String customVersion = System.getenv("CUSTOM_VERSION")
-if (customVersion != null && !customVersion.isEmpty()) {
-    version = "${version}-${customVersion}"
-}
-println "Version: ${version}"
 
 repositories {
     mavenCentral()
