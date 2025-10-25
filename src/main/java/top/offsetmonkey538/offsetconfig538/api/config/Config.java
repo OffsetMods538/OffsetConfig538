@@ -75,19 +75,36 @@ public interface Config {
 
     /**
      * Provides the {@link Path} to the config file.
-     * <br>
-     * Should also include extension.
      *
      * @return the {@link Path} to the config file.
      */
-    @NotNull Path getFilePath();
+    default @NotNull Path getFilePath() {
+        return getConfigDirPath().resolve(getId() + getFileExtension());
+    }
+
+    /**
+     * Provides the {@link Path} to the config directory.
+     *
+     * @return the {@link Path} to the config directory.
+     */
+    @NotNull Path getConfigDirPath();
+
 
     /**
      * Provides an identifier for this config file.
      * <br>
      * Example: {@code github-resourcepack-manager/main}
      *
-     * @return ad identifier for this config file.
+     * @return an identifier for this config file.
      */
     @NotNull String getId();
+
+    /**
+     * Provides the extension for this config file.
+     * <br>
+     * MUST start with a dot ({@code .})
+     */
+    default @NotNull String getFileExtension() {
+        return ".json";
+    }
 }

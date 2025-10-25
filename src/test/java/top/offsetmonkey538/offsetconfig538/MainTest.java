@@ -33,13 +33,13 @@ public class MainTest {
         float veryNice = 1233;
 
         @Override
-        public @NotNull Path getFilePath() {
-            return Path.of(".", "test", "test2.json");
+        public @NotNull Path getConfigDirPath() {
+            return Path.of(".");
         }
 
         @Override
         public @NotNull String getId() {
-            return "test";
+            return "test/test2";
         }
 
         @Override
